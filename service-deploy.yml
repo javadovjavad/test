@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-web-deployment-multi-pod
+  labels:
+    app: my-k8s-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      project: petclinic
+  template:
+    metadata:
+      labels:
+        project: petclinic
+    spec:
+      containers:
+        - name: my-web
+          image: javadoff/k8s-httpd
+          ports:
+            - containerPort: 80
+        - name: not-my-web
+          image: tomcat:8.5.38
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-multi-pods-service
+  labels:
+    env  : prod
+    owner: JavadJ
+spec:
+  type: LoadBalancer
+  selector:
+    project: petclinic
+  ports:
+    -name       : my-web-app-listener
+     protocol   : TCP
+     ports      : 80
+     targetPort : 80
+
+    -name       : not-my-web-app-listener
+     protocol   : TCP
+     ports      : 8888
+     targetPort : 8080
